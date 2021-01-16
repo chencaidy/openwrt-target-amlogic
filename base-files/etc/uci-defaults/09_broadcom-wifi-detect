@@ -1,0 +1,8 @@
+#!/bin/sh
+
+[ -d /sys/class/net/wlan0 ] && [ ! -f /etc/config/wireless ] && {
+	/sbin/wifi config
+	exit 0
+}
+
+exit 1
