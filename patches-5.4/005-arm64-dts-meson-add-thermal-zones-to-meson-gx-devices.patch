@@ -1,0 +1,302 @@
+From cd13d5f115f91065319c7604132d14db7048391e Mon Sep 17 00:00:00 2001
+From: Christian Hewitt <christianshewitt@gmail.com>
+Date: Mon, 16 Mar 2020 07:20:54 +0400
+Subject: arm64: dts: meson: add thermal zones to meson gx devices
+
+Adapt and update current VIM2 thermal zones support so that zones are
+available on all meson GXBB/GXL/GXM devices - similar to changes made
+for G12A/G12B/SM1 devices.
+
+Suggested-by: Nick Xie <nick@khadas.com>
+Signed-off-by: Christian Hewitt <christianshewitt@gmail.com>
+Signed-off-by: Kevin Hilman <khilman@baylibre.com>
+Reviewed-by: Neil Armstrong <narmstrong@baylibre.com>
+Link: https://lore.kernel.org/r/1584328854-28575-1-git-send-email-christianshewitt@gmail.com
+---
+ arch/arm64/boot/dts/amlogic/meson-gx.dtsi          | 52 +++++++++++++
+ .../boot/dts/amlogic/meson-gxm-khadas-vim2.dts     | 87 ++++------------------
+ arch/arm64/boot/dts/amlogic/meson-gxm.dtsi         | 28 +++++++
+ 3 files changed, 95 insertions(+), 72 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/amlogic/meson-gx.dtsi b/arch/arm64/boot/dts/amlogic/meson-gx.dtsi
+index 40db06e28b662..03f79fe045b7f 100644
+--- a/arch/arm64/boot/dts/amlogic/meson-gx.dtsi
++++ b/arch/arm64/boot/dts/amlogic/meson-gx.dtsi
+@@ -12,6 +12,7 @@
+ #include <dt-bindings/gpio/gpio.h>
+ #include <dt-bindings/interrupt-controller/irq.h>
+ #include <dt-bindings/interrupt-controller/arm-gic.h>
++#include <dt-bindings/thermal/thermal.h>
+ 
+ / {
+ 	interrupt-parent = <&gic>;
+@@ -83,6 +84,7 @@
+ 			enable-method = "psci";
+ 			next-level-cache = <&l2>;
+ 			clocks = <&scpi_dvfs 0>;
++			#cooling-cells = <2>;
+ 		};
+ 
+ 		cpu1: cpu@1 {
+@@ -92,6 +94,7 @@
+ 			enable-method = "psci";
+ 			next-level-cache = <&l2>;
+ 			clocks = <&scpi_dvfs 0>;
++			#cooling-cells = <2>;
+ 		};
+ 
+ 		cpu2: cpu@2 {
+@@ -101,6 +104,7 @@
+ 			enable-method = "psci";
+ 			next-level-cache = <&l2>;
+ 			clocks = <&scpi_dvfs 0>;
++			#cooling-cells = <2>;
+ 		};
+ 
+ 		cpu3: cpu@3 {
+@@ -110,6 +114,7 @@
+ 			enable-method = "psci";
+ 			next-level-cache = <&l2>;
+ 			clocks = <&scpi_dvfs 0>;
++			#cooling-cells = <2>;
+ 		};
+ 
+ 		l2: l2-cache0 {
+@@ -117,6 +122,53 @@
+ 		};
+ 	};
+ 
++	thermal-zones {
++		cpu-thermal {
++			polling-delay-passive = <250>; /* milliseconds */
++			polling-delay = <1000>; /* milliseconds */
++
++			thermal-sensors = <&scpi_sensors 0>;
++
++			trips {
++				cpu_passive: cpu-passive {
++					temperature = <80000>; /* millicelsius */
++					hysteresis = <2000>; /* millicelsius */
++					type = "passive";
++				};
++
++				cpu_hot: cpu-hot {
++					temperature = <90000>; /* millicelsius */
++					hysteresis = <2000>; /* millicelsius */
++					type = "hot";
++				};
++
++				cpu_critical: cpu-critical {
++					temperature = <110000>; /* millicelsius */
++					hysteresis = <2000>; /* millicelsius */
++					type = "critical";
++				};
++			};
++
++			cpu_cooling_maps: cooling-maps {
++				map0 {
++					trip = <&cpu_passive>;
++					cooling-device = <&cpu0 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++							 <&cpu1 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++							 <&cpu2 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++							 <&cpu3 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
++				};
++
++				map1 {
++					trip = <&cpu_hot>;
++					cooling-device = <&cpu0 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++							 <&cpu1 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++							 <&cpu2 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++							 <&cpu3 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
++				};
++			};
++		};
++	};
++
+ 	arm-pmu {
+ 		compatible = "arm,cortex-a53-pmu";
+ 		interrupts = <GIC_SPI 137 IRQ_TYPE_LEVEL_HIGH>,
+diff --git a/arch/arm64/boot/dts/amlogic/meson-gxm-khadas-vim2.dts b/arch/arm64/boot/dts/amlogic/meson-gxm-khadas-vim2.dts
+index d5dc12878dfe4..27eeab71ec772 100644
+--- a/arch/arm64/boot/dts/amlogic/meson-gxm-khadas-vim2.dts
++++ b/arch/arm64/boot/dts/amlogic/meson-gxm-khadas-vim2.dts
+@@ -8,7 +8,6 @@
+ /dts-v1/;
+ 
+ #include <dt-bindings/input/input.h>
+-#include <dt-bindings/thermal/thermal.h>
+ 
+ #include "meson-gxm.dtsi"
+ 
+@@ -100,49 +99,6 @@
+ 		clock-names = "ext_clock";
+ 	};
+ 
+-	thermal-zones {
+-		cpu-thermal {
+-			polling-delay-passive = <250>; /* milliseconds */
+-			polling-delay = <1000>; /* milliseconds */
+-
+-			thermal-sensors = <&scpi_sensors 0>;
+-
+-			trips {
+-				cpu_alert0: cpu-alert0 {
+-					temperature = <70000>; /* millicelsius */
+-					hysteresis = <2000>; /* millicelsius */
+-					type = "active";
+-				};
+-
+-				cpu_alert1: cpu-alert1 {
+-					temperature = <80000>; /* millicelsius */
+-					hysteresis = <2000>; /* millicelsius */
+-					type = "passive";
+-				};
+-			};
+-
+-			cooling-maps {
+-				map0 {
+-					trip = <&cpu_alert0>;
+-					cooling-device = <&gpio_fan THERMAL_NO_LIMIT 1>;
+-				};
+-
+-				map1 {
+-					trip = <&cpu_alert1>;
+-					cooling-device = <&gpio_fan 2 THERMAL_NO_LIMIT>,
+-							 <&cpu0 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
+-							 <&cpu1 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
+-							 <&cpu2 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
+-							 <&cpu3 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
+-							 <&cpu4 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
+-							 <&cpu5 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
+-							 <&cpu6 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
+-							 <&cpu7 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+-				};
+-			};
+-		};
+-	};
+-
+ 	hdmi_5v: regulator-hdmi-5v {
+ 		compatible = "regulator-fixed";
+ 
+@@ -198,36 +154,23 @@
+ 	hdmi-phandle = <&hdmi_tx>;
+ };
+ 
+-&cpu0 {
+-	#cooling-cells = <2>;
+-};
+-
+-&cpu1 {
+-	#cooling-cells = <2>;
+-};
+-
+-&cpu2 {
+-	#cooling-cells = <2>;
+-};
+-
+-&cpu3 {
+-	#cooling-cells = <2>;
+-};
+-
+-&cpu4 {
+-	#cooling-cells = <2>;
+-};
+ 
+-&cpu5 {
+-	#cooling-cells = <2>;
+-};
+-
+-&cpu6 {
+-	#cooling-cells = <2>;
+-};
++&cpu_cooling_maps {
++	map0 {
++		cooling-device = <&gpio_fan THERMAL_NO_LIMIT 1>;
++	};
+ 
+-&cpu7 {
+-	#cooling-cells = <2>;
++	map1 {
++		cooling-device = <&gpio_fan 2 THERMAL_NO_LIMIT>,
++				 <&cpu0 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++				 <&cpu1 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++				 <&cpu2 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++				 <&cpu3 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++				 <&cpu4 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++				 <&cpu5 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++				 <&cpu6 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++				 <&cpu7 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
++	};
+ };
+ 
+ &ethmac {
+diff --git a/arch/arm64/boot/dts/amlogic/meson-gxm.dtsi b/arch/arm64/boot/dts/amlogic/meson-gxm.dtsi
+index 5ff64a0d2dcf8..b6f89f108e282 100644
+--- a/arch/arm64/boot/dts/amlogic/meson-gxm.dtsi
++++ b/arch/arm64/boot/dts/amlogic/meson-gxm.dtsi
+@@ -49,6 +49,7 @@
+ 			enable-method = "psci";
+ 			next-level-cache = <&l2>;
+ 			clocks = <&scpi_dvfs 1>;
++			#cooling-cells = <2>;
+ 		};
+ 
+ 		cpu5: cpu@101 {
+@@ -58,6 +59,7 @@
+ 			enable-method = "psci";
+ 			next-level-cache = <&l2>;
+ 			clocks = <&scpi_dvfs 1>;
++			#cooling-cells = <2>;
+ 		};
+ 
+ 		cpu6: cpu@102 {
+@@ -67,6 +69,7 @@
+ 			enable-method = "psci";
+ 			next-level-cache = <&l2>;
+ 			clocks = <&scpi_dvfs 1>;
++			#cooling-cells = <2>;
+ 		};
+ 
+ 		cpu7: cpu@103 {
+@@ -76,6 +79,7 @@
+ 			enable-method = "psci";
+ 			next-level-cache = <&l2>;
+ 			clocks = <&scpi_dvfs 1>;
++			#cooling-cells = <2>;
+ 		};
+ 	};
+ };
+@@ -124,6 +128,30 @@
+ 	compatible = "amlogic,meson-gxm-aoclkc", "amlogic,meson-gx-aoclkc";
+ };
+ 
++&cpu_cooling_maps {
++	map0 {
++		cooling-device = <&cpu0 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++				 <&cpu1 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++				 <&cpu2 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++				 <&cpu3 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++				 <&cpu4 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++				 <&cpu5 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++				 <&cpu6 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++				 <&cpu7 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
++	};
++
++	map1 {
++		cooling-device = <&cpu0 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++				 <&cpu1 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++				 <&cpu2 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++				 <&cpu3 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++				 <&cpu4 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++				 <&cpu5 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++				 <&cpu6 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++				 <&cpu7 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
++	};
++};
++
+ &saradc {
+ 	compatible = "amlogic,meson-gxm-saradc", "amlogic,meson-saradc";
+ };
+-- 
+cgit 1.2.3-1.el7
+
