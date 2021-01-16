@@ -1,0 +1,3 @@
+echo "Loading mainline U-Boot ..."
+if fatload usb 0 0x1000000 u-boot.img; then go 0x1000000; fi;
+if fatload mmc 0 0x1000000 u-boot.img; then go 0x1000000; fi;
