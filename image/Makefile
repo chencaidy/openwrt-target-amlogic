@@ -24,17 +24,19 @@ define Build/boot-common
 	$(CP) $(STAGING_DIR_IMAGE)/$(UBOOT_DEVICE_NAME)-u-boot.bin $@.boot/u-boot.img
 endef
 
-define Build/boot-script
+define Build/auto-script
 	# Make amlogic autoscript to load mainline U-boot
 	mkimage -A arm -O linux -T script -C none -a 0 -e 0 \
 		-n 'auto_script' \
-		-d autoscript/phicomm-n1.autoscript \
+		-d autoscript/$(if $(1),$(1),default).autoscript \
 		$@.boot/aml_autoscript
+endef
 
+define Build/boot-script
 	# Make an U-boot image and copy it to the boot partition
 	mkimage -A arm -O linux -T script -C none -a 0 -e 0 \
 		-n 'OpenWrt bootscript' \
-		-d $(if $(1),$(1),mmc).bootscript \
+		-d bootscript/$(if $(1),$(1),default).bootscript \
 		$@.boot/boot.scr
 endef
 
