@@ -17,11 +17,21 @@ endef
 
 include $(INCLUDE_DIR)/target.mk
 
-DEFAULT_PACKAGES += kmod-gpio-button-hotplug \
-			partx-utils e2fsprogs mkf2fs fdisk \
-		    autocore-arm automount autosamba \
-			ethtool iperf3 haveged htop lm-sensors \
-		    luci-app-zerotier
+DEFAULT_PACKAGES += partx-utils e2fsprogs mkf2fs fdisk \
+					autocore-arm automount autosamba ipv6helper \
+					ethtool iperf3 curl haveged htop lm-sensors \
+					luci-app-zerotier
+
+# Kernel packages
+DEFAULT_PACKAGES += kmod-hid kmod-hid-generic \
+					kmod-usb-net kmod-usb-net-rtl8152 kmod-usb-net-rndis
+
+# Application packages
+DEFAULT_PACKAGES += coreutils coreutils-nohup ruby ruby-yaml libcap libcap-bin \
+					luci-app-adbyby-plus luci-app-aria2 luci-app-diskman luci-app-docker \
+					luci-app-frpc luci-app-hd-idle luci-app-jd-dailybonus luci-app-minidlna \
+					luci-app-netdata luci-app-transmission luci-app-ttyd luci-app-usb-printer \
+					luci-app-vssr luci-app-xlnetacc luci-theme-argon
 
 KERNELNAME:=Image dtbs
 

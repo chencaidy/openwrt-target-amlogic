@@ -13,9 +13,8 @@ define Device/amediatech_x96-air
   IMAGE/sysupgrade.img.gz := boot-common | boot-script | boot-img | gzip | append-metadata
   IMAGE/factory.img.gz := boot-common | boot-script | boot-img | gzip
   DEVICE_PACKAGES := \
-    kmod-usb-net kmod-usb-net-rtl8152 \
     kmod-brcmfmac wpad-basic-wolfssl cypress-firmware-43455-sdio \
-    kmod-hid kmod-hid-generic triggerhappy
+    triggerhappy
 endef
 TARGET_DEVICES += amediatech_x96-air
 
@@ -27,7 +26,6 @@ define Device/phicomm-n1
   IMAGE/sysupgrade.img.gz := boot-common | auto-script phicomm-n1 | boot-script | boot-img | gzip | append-metadata
   IMAGE/factory.img.gz := boot-common | auto-script phicomm-n1 | boot-script | boot-img | gzip
   DEVICE_PACKAGES := \
-    kmod-usb-net kmod-usb-net-rtl8152 \
     kmod-brcmfmac wpad-basic-wolfssl cypress-firmware-43455-sdio
 endef
 TARGET_DEVICES += phicomm-n1
