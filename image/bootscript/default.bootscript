@@ -1,6 +1,6 @@
 part uuid ${devtype} ${devnum}:2 uuid
 
-setenv bootargs "console=ttyAML0,115200 console=tty0 root=PARTUUID=${uuid} rw rootwait"
+setenv bootargs "console=ttyAML0,115200 console=tty0 no_console_suspend consoleblank=0 root=PARTUUID=${uuid} rw rootwait"
 
 load ${devtype} ${devnum}:1 ${fdt_addr_r} dtb.img
 load ${devtype} ${devnum}:1 ${kernel_addr_r} kernel.img
