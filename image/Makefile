@@ -43,27 +43,19 @@ define Build/boot-script
 		$@.boot/boot.scr
 endef
 
-define Build/sd-img
+define Build/boot-img
 	# Creates the final SD/eMMC images
-	# combining boot partition, root partition as well as the u-boot bootloader
 	./gen_aml_image.sh \
 		$@ \
 		$(CONFIG_TARGET_KERNEL_PARTSIZE) $@.boot \
 		$(CONFIG_TARGET_ROOTFS_PARTSIZE) $(IMAGE_ROOTFS) \
 		32768
+endef
 
+define Build/boot-sm1
 	# Copy the bootable u-boot to the image at sector 0x200
 	dd if="$(STAGING_DIR_IMAGE)"/$(UBOOT_DEVICE_NAME)-u-boot.sd.bin of="$@" bs=1 count=444 conv=notrunc
 	dd if="$(STAGING_DIR_IMAGE)"/$(UBOOT_DEVICE_NAME)-u-boot.sd.bin of="$@" bs=512 skip=1 seek=1 conv=notrunc
-endef
-
-define Build/usb-img
-	# Creates the final USB/Upgrade images
-	./gen_aml_image.sh \
-		$@ \
-		$(CONFIG_TARGET_KERNEL_PARTSIZE) $@.boot \
-		$(CONFIG_TARGET_ROOTFS_PARTSIZE) $(IMAGE_ROOTFS) \
-		32768
 endef
 
 ### Devices ###
