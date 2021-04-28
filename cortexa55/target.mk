@@ -9,7 +9,6 @@ include $(TOPDIR)/rules.mk
 
 ARCH:=aarch64
 BOARDNAME:=Meson SM1 boards
-CPU_TYPE:=cortex-a55
 
 define Target/Description
 	Build firmware image for Amlogic Meson SM1 devices.
