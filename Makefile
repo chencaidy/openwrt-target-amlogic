@@ -21,7 +21,7 @@ endef
 
 include $(INCLUDE_DIR)/target.mk
 
-DEFAULT_PACKAGES += partx-utils e2fsprogs mkf2fs fdisk \
+DEFAULT_PACKAGES += uboot-envtools partx-utils e2fsprogs mkf2fs fdisk \
 					autocore-arm automount autosamba ipv6helper \
 					ethtool iperf3 curl haveged htop lm-sensors \
 					luci-app-zerotier
