@@ -10,7 +10,7 @@ include $(TOPDIR)/rules.mk
 BOARD:=amlogic
 BOARDNAME:=Amlogic Meson
 FEATURES:=ext4 squashfs audio usb display gpio fpu rootfs-part boot-part
-SUBTARGETS:=cortexa53 cortexa55
+SUBTARGETS:=mesongx mesonsm1
 
 KERNEL_PATCHVER=5.4
 KERNELNAME:=Image dtbs
