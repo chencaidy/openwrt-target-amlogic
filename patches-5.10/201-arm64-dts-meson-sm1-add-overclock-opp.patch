@@ -1,0 +1,19 @@
+--- a/arch/arm64/boot/dts/amlogic/meson-sm1.dtsi
++++ b/arch/arm64/boot/dts/amlogic/meson-sm1.dtsi
+@@ -114,6 +114,16 @@
+ 			opp-hz = /bits/ 64 <1908000000>;
+ 			opp-microvolt = <950000>;
+ 		};
++
++		opp-2016000000 {
++			opp-hz = /bits/ 64 <2016000000>;
++			opp-microvolt = <980000>;
++		};
++
++		opp-2124000000 {
++			opp-hz = /bits/ 64 <2124000000>;
++			opp-microvolt = <1020000>;
++		};
+ 	};
+ };
+ 

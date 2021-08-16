@@ -12,7 +12,7 @@ BOARDNAME:=Amlogic Meson
 FEATURES:=ext4 squashfs audio usb display gpio fpu rootfs-part boot-part
 SUBTARGETS:=mesongx mesonsm1
 
-KERNEL_PATCHVER=5.4
+KERNEL_PATCHVER=5.10
 KERNELNAME:=Image dtbs
 
 define Target/Description
