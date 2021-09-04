@@ -62,7 +62,7 @@ endef
 define Device/Default
   PROFILES := Default
   KERNEL := kernel-bin
-  IMAGES := factory.img.gz sysupgrade.img.gz
+  IMAGES := sdcard.img.gz
   SUPPORTED_DEVICES := $(subst _,$(comma),$(1))
   DEVICE_DTS = amlogic/$$(SOC)-$(lastword $(subst _, ,$(1)))
 endef
