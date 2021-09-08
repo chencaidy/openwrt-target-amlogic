@@ -8,7 +8,8 @@
 include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/image.mk
 
-DEVICE_VARS += UBOOT_DEVICE_NAME
+FAT32_BLOCK_SIZE = 1024
+FAT32_BLOCKS = $(shell echo $$(($(CONFIG_TARGET_KERNEL_PARTSIZE)*1024*1024/$(FAT32_BLOCK_SIZE))))
 
 define Build/Compile
 	$(CP) $(LINUX_DIR)/COPYING $(KDIR)/COPYING.linux
@@ -16,44 +17,40 @@ endef
 
 ### Image scripts ###
 define Build/boot-common
-	# This creates a new folder copies the dtb (as dtb.img) 
-	# and the kernel image (as kernel.img)
-	rm -fR $@.boot
-	mkdir -p $@.boot
-
-	$(CP) $(DTS_DIR)/$(DEVICE_DTS).dtb $@.boot/dtb.img
-	$(CP) $(IMAGE_KERNEL) $@.boot/kernel.img
-	# Copy the u-boot image to the boot partition
-	$(CP) $(STAGING_DIR_IMAGE)/$(UBOOT_DEVICE_NAME)-u-boot.bin $@.boot/u-boot.img
+	rm -f $@.boot
+	mkfs.fat -n BOOT -C $@.boot $(FAT32_BLOCKS)
+	mcopy -i $@.boot $(KDIR)/COPYING.linux ::
+	mcopy -i $@.boot $(IMAGE_KERNEL) ::kernel.img
+	mcopy -i $@.boot $(DTS_DIR)/$(DEVICE_DTS).dtb ::dtb.img
+	mcopy -i $@.boot $(STAGING_DIR_IMAGE)/$(UBOOT_DEVICE_NAME)-u-boot.bin ::u-boot.img
 endef
 
+# Make Amlogic autoscript to load mainline U-boot
 define Build/auto-script
-	# Make amlogic autoscript to load mainline U-boot
 	mkimage -A arm -O linux -T script -C none -a 0 -e 0 \
 		-n 'auto_script' \
 		-d autoscript/$(if $(1),$(1),default).autoscript \
-		$@.boot/aml_autoscript
+		$(KDIR)/aml_autoscript
+	mcopy -i $@.boot $(KDIR)/aml_autoscript ::
 endef
 
+# Make U-boot script and copy it to the boot partition
 define Build/boot-script
-	# Make an U-boot image and copy it to the boot partition
 	mkimage -A arm -O linux -T script -C none -a 0 -e 0 \
 		-n 'OpenWrt bootscript' \
 		-d bootscript/$(if $(1),$(1),default).bootscript \
-		$@.boot/boot.scr
+		$(KDIR)/boot.scr
+	mcopy -i $@.boot $(KDIR)/boot.scr ::
 endef
 
+# Create the final SD/eMMC images
 define Build/boot-img
-	# Creates the final SD/eMMC images
-	./gen_aml_image.sh \
-		$@ \
-		$(CONFIG_TARGET_KERNEL_PARTSIZE) $@.boot \
-		$(CONFIG_TARGET_ROOTFS_PARTSIZE) $(IMAGE_ROOTFS) \
-		32768
+	./gen_aml_image.sh $@ $@.boot $(IMAGE_ROOTFS) \
+		$(CONFIG_TARGET_KERNEL_PARTSIZE) $(CONFIG_TARGET_ROOTFS_PARTSIZE)
 endef
 
+# Copy the bootable u-boot to the image at sector 0x200
 define Build/boot-sm1
-	# Copy the bootable u-boot to the image at sector 0x200
 	dd if="$(STAGING_DIR_IMAGE)"/$(UBOOT_DEVICE_NAME)-u-boot.sd.bin of="$@" bs=1 count=444 conv=notrunc
 	dd if="$(STAGING_DIR_IMAGE)"/$(UBOOT_DEVICE_NAME)-u-boot.sd.bin of="$@" bs=512 skip=1 seek=1 conv=notrunc
 endef
