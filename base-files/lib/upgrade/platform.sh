@@ -1,5 +1,13 @@
+. /lib/functions.sh
+
+REQUIRE_IMAGE_METADATA=1
+
+# copied from x86's platform.sh
+
 platform_check_image() {
 	local diskdev partdev diff
+
+	[ "$#" -gt 1 ] && return 1
 
 	export_bootdevice && export_partdevice diskdev 0 || {
 		echo "Unable to determine upgrade device"
@@ -23,16 +31,8 @@ platform_check_image() {
 		ask_bool 0 "Abort" && exit 1
 		return 0
 	fi
-}
 
-platform_copy_config() {
-	local partdev
-
-	if export_partdevice partdev 1; then
-		mount -o rw,noatime "/dev/$partdev" /mnt
-		cp -af "$UPGRADE_BACKUP" "/mnt/$BACKUP_FILE"
-		umount /mnt
-	fi
+	return 0;
 }
 
 platform_do_upgrade() {
@@ -60,7 +60,7 @@ platform_do_upgrade() {
 	fi
 
 	if [ -n "$diff" ]; then
-		get_image "$@" | dd of="/dev/$diskdev" bs=4096 conv=fsync
+		get_image "$@" | dd of="/dev/$diskdev" bs=2M conv=fsync
 
 		# Separate removal and addtion is necessary; otherwise, partition 1
 		# will be missing if it overlaps with the old partition 2
@@ -77,10 +77,22 @@ platform_do_upgrade() {
 			get_image "$@" | dd of="/dev/$partdev" ibs="512" obs=1M skip="$start" count="$size" conv=fsync
 		else
 			echo "Unable to find partition $part device, skipped."
-		fi
+	fi
 	done < /tmp/partmap.image
 
 	#copy partition uuid
 	echo "Writing new UUID to /dev/$diskdev..."
 	get_image "$@" | dd of="/dev/$diskdev" bs=1 skip=440 count=4 seek=440 conv=fsync
+}
+
+platform_copy_config() {
+	local partdev
+
+	if export_partdevice partdev 1; then
+		mkdir -p /boot
+		[ -f /boot/kernel.img ] || mount -t vfat -o rw,noatime "/dev/$partdev" /boot
+		cp -af "$UPGRADE_BACKUP" "/boot/$BACKUP_FILE"
+		sync
+		umount /boot
+	fi
 }
