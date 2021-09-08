@@ -5,8 +5,6 @@
 . /lib/functions.sh
 . /lib/functions/system.sh
 
-[ -d /sys/class/net/wlan0 ] && [ ! -f /etc/config/wireless ] && { /sbin/wifi config }
-
 board_config_update
 
 board=$(board_name)
@@ -14,7 +12,7 @@ board=$(board_name)
 case "$board" in
 amediatech,x96-air |\
 phicomm,n1)
-	ucidef_set_interface_lan "eth0 wlan0"
+	ucidef_set_interface_lan "eth0"
 	;;
 esac
 

@@ -5,7 +5,7 @@
 # See /LICENSE for more information.
 #
 
-define Device/phicomm-n1
+define Device/phicomm_n1
   DEVICE_VENDOR := Phicomm
   DEVICE_MODEL := N1
   SOC := meson-gxl-s905d
@@ -14,4 +14,4 @@ define Device/phicomm-n1
   DEVICE_PACKAGES := \
     kmod-brcmfmac wpad-basic-wolfssl cypress-firmware-43455-sdio
 endef
-TARGET_DEVICES += phicomm-n1
+TARGET_DEVICES += phicomm_n1
