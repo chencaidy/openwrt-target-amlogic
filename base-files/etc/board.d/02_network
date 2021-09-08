@@ -5,6 +5,8 @@
 . /lib/functions.sh
 . /lib/functions/system.sh
 
+[ -d /sys/class/net/wlan0 ] && [ ! -f /etc/config/wireless ] && { /sbin/wifi config }
+
 board_config_update
 
 board=$(board_name)
