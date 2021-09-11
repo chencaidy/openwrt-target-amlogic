@@ -11,8 +11,8 @@
 #include <dt-bindings/sound/meson-g12a-tohdmitx.h>
 
 / {
-	compatible = "amediatech,x96-air", "amlogic,sm1";
-	model = "Amediatech X96 Air";
+	compatible = "amedia,x96-air", "amlogic,sm1";
+	model = "AMedia X96 Air";
 
 	aliases {
 		serial0 = &uart_AO;
