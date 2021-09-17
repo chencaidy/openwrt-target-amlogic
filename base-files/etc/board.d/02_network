@@ -10,7 +10,7 @@ board_config_update
 board=$(board_name)
 
 case "$board" in
-amediatech,x96-air |\
+amedia,x96air |\
 phicomm,n1)
 	ucidef_set_interface_lan "eth0"
 	;;
